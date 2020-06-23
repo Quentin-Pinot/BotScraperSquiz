@@ -6,82 +6,85 @@ from colorama import Fore, Back, Style, init
 import random, os, sys
 
 
-try:
-    init()
 
-    def time():
-        return strftime("%d/%m/%Y %H:%M:%S", localtime())
+init()
 
-    id_quizz = "xari_le_fast"
-    pw_quizz = "Ka84(2r!G"
+def time():
+    return strftime("%d/%m/%Y %H:%M:%S", localtime())
 
-    q = ""
-    a = ""
+id_quizz = "xari_le_fast"
+pw_quizz = "Ka84(2r!G"
 
-    nbrQ = 0
-    nbrGoodAnswer = 0
+q = ""
+a = ""
 
-    bdd = Pg_manager("localhost", "squizz", "postgres", "admin", "5432")
+nbrQ = 0
+nbrGoodAnswer = 0
 
-    bot = QuizzBot()
+bdd = Pg_manager("localhost", "squizz", "postgres", "admin", "5432")
 
-    #bot.connect_to_twitch(id_quizz, pw_quizz)
-    #print("connected to twitch")
-    #sleep(2)
-    bot.connect_to_initie()
-    print("connected to the room inite")
+bot = QuizzBot()
 
-    while(True):
+bot.connect_to_VPN()
+print("connected to the VPN")
 
-        if nbrQ == 15:
-            print(time() + "-> End of the game good answer  : " + Fore.GREEN + str(nbrGoodAnswer) + Style.RESET_ALL)
-            nbrQ = 0
-            nbrGoodAnswer = 0
+bot.connct_to_SQUIZ()
+print("Connected to SQUIZZ")
 
-        q = bot.scrapping_questions()
-        answerQ = bdd.selectInitie(str(q))
+#bot.connect_to_twitch(id_quizz, pw_quizz)
+#print("connected to twitch")
+#sleep(2)
 
-        if answerQ == None:
-            a = bot.scrapping_answers()
-            bdd.insertInitie(str(q), str(a))
+bot.connect_to_initie()
+print("connected to the room inite")
 
-            print(time() + " -> Question added : " + q)
-            print(time() + " -> Answer added : " + a)
+while(True):
 
-            print(time() + Back.RED + Fore.WHITE + " -> No answered" + Style.RESET_ALL)
-            bdd.insertReplyofBot("0")
+    if nbrQ == 15:
+        print(time() + "-> End of the game good answer  : " + Fore.GREEN + str(nbrGoodAnswer) + Style.RESET_ALL)
+        nbrQ = 0
+        nbrGoodAnswer = 0
 
-            sleep(7.5)
+    q = bot.scrapping_questions()
+    answerQ = bdd.selectInitie(str(q))
 
-        else:
-            waiting = random.uniform(0, 3)
-            print(time() + " -> Attente avant de répondre : " + str(waiting))
-            sleep(waiting)
+    if answerQ == None:
+        a = bot.scrapping_answers()
+        bdd.insertInitie(str(q), str(a))
 
-            answerSplit = "".join(answerQ).split(",")
+        print(time() + " -> Question added : " + q)
+        print(time() + " -> Answer added : " + a)
 
-            if len(answerSplit) == 1:
-                answer = answerSplit[0].lower()
-            elif len(answerSplit) == 2:
-                answer =  answerSplit[random.randint(0, 1)].lower()
-            elif len(answerSplit) > 2:
-                answer = answerSplit[random.randint(0, 2)].lower()       
+        print(time() + Back.RED + Fore.WHITE + " -> No answered" + Style.RESET_ALL)
+        bdd.insertReplyofBot("0")
 
-            bot.write_answer(answer.replace("l'", "").replace("un", "").replace("une", "").replace("le", "").replace("la", "").replace("les", ""))
-            
-            print(time() + " -> Question answered : " + q)
-            print(time() + Back.GREEN + Fore.WHITE + " -> Answer writed : " + answer + Style.RESET_ALL)
-            bdd.insertReplyofBot("1", str(q), str(answer))
+        sleep(7.5)
 
-            nbrGoodAnswer += 1
+    else:
+        waiting = random.uniform(0, 3)
+        print(time() + " -> Attente avant de répondre : " + str(waiting))
+        sleep(waiting)
 
-            sleep(18-waiting)
+        answerSplit = "".join(answerQ).split(",")
 
-        nbrQ += 1
-except:
-    bot.close()
-    os.execv(sys.executable, ['python'] + sys.argv)
+        if len(answerSplit) == 1:
+            answer = answerSplit[0].lower()
+        elif len(answerSplit) == 2:
+            answer =  answerSplit[random.randint(0, 1)].lower()
+        elif len(answerSplit) > 2:
+            answer = answerSplit[random.randint(0, 2)].lower()       
 
+        bot.write_answer(answer.replace("l'", "").replace("un", "").replace("une", "").replace("le", "").replace("la", "").replace("les", ""))
+        
+        print(time() + " -> Question answered : " + q)
+        print(time() + Back.GREEN + Fore.WHITE + " -> Answer writed : " + answer + Style.RESET_ALL)
+        bdd.insertReplyofBot("1", str(q), str(answer))
+
+        nbrGoodAnswer += 1
+
+        sleep(18-waiting)
+
+    nbrQ += 1
 
 
     
